@@ -44,7 +44,27 @@ code {
 
 ul {
   list-style: none;
+  margin: 0;
   padding-inline-start: 20px;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+.reset {
+  background-color: #fff;
+  border: 2px solid #999;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.reset:hover {
+  background-color: #999;
+  color: #fff;
 }
 
 * {
@@ -79,7 +99,7 @@ body {
 }
 
 .status {
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
 .game {
@@ -89,5 +109,4 @@ body {
 
 .game-info {
   margin-left: 20px;
-  margin-top: 10px;
 }
