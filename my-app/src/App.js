@@ -64,22 +64,22 @@ export default function Game() {
     setCurrentMove(nextHistory.length - 1);
   }
 
-  function jumpTo(nextMove) {
-    setCurrentMove(nextMove);
+
+
+  function resetGame() {
+    setHistory([Array(9).fill(null)]);
+    setCurrentMove(0);
   }
 
   const moves = history.map((squares, move) => {
-    let description;
     if (move > 0) {
-      description = "Go to move #" + move;
-    } else {
-      description = "Go to game start";
+      return (
+        <li key={move}>
+          <span>You are at move #{move}</span>
+        </li>
+      );
     }
-    return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    );
+    return null;
   });
 
   return (
@@ -88,7 +88,14 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <ol>{moves}</ol>
+        <ul>
+          {moves}
+          <li>
+            <button className="reset" onClick={resetGame}>
+              Reset game
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   );

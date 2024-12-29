@@ -43,6 +43,7 @@ code {
 }
 
 ul {
+  list-style: none;
   padding-inline-start: 20px;
 }
 
