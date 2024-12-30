@@ -1,11 +1,13 @@
-import { useState } from "react";
-import "./index.css";
+import { useState, useCallback } from "react";
 
-function Square({ value, onSquareClick, winner }) {
+function Square({ value, onSquareClick, winner, isWinningSquare }) {
   return (
     <button
       className="square"
-      style={{ backgroundColor: winner ? "green" : "white" }}
+      style={{
+        backgroundColor: winner && "green",
+        opacity: isWinningSquare && 0.5,
+      }}
       onClick={onSquareClick}>
       {value}
     </button>
@@ -13,83 +15,96 @@ function Square({ value, onSquareClick, winner }) {
 }
 
 function Board({ xIsNext, squares, onPlay }) {
-  function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
-      return;
+  const calculateWinner = useCallback((squares) => {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (
+        squares[a] &&
+        squares[a] === squares[b] &&
+        squares[a] === squares[c]
+      ) {
+        return [a, b, c];
+      }
     }
-    const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = "X";
-    } else {
-      nextSquares[i] = "O";
-    }
-    onPlay(nextSquares);
-  }
+    return null;
+  }, []);
 
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = "Winner: " + winner;
-  } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
-  }
+  const winningSquares = calculateWinner(squares);
+  const isDraw = !winningSquares && squares.every((square) => square !== null);
+
+  const handleClick = useCallback(
+    (i) => {
+      if (winningSquares || squares[i]) {
+        return;
+      }
+      const nextSquares = squares.slice();
+      if (xIsNext) {
+        nextSquares[i] = "X";
+      } else {
+        nextSquares[i] = "O";
+      }
+      onPlay(nextSquares);
+    },
+    [squares, xIsNext, onPlay, winningSquares]
+  );
 
   return (
     <>
-      <div className="board-row">
-        <Square
-          value={squares[0]}
-          onSquareClick={() => handleClick(0)}
-          winner={winner && winner === squares[0]}
-        />
-        <Square
-          value={squares[1]}
-          onSquareClick={() => handleClick(1)}
-          winner={winner && winner === squares[1]}
-        />
-        <Square
-          value={squares[2]}
-          onSquareClick={() => handleClick(2)}
-          winner={winner && winner === squares[2]}
-        />
+      <div className="board">
+        {squares.map((square, i) => {
+          if (i % 3 === 0) {
+            return (
+              <div key={i} className="board-row">
+                <Square
+                  value={square}
+                  onSquareClick={() => handleClick(i)}
+                  winner={winningSquares && winningSquares.includes(i)}
+                  isWinningSquare={winningSquares && winningSquares.includes(i)}
+                />
+                <Square
+                  value={squares[i + 1]}
+                  onSquareClick={() => handleClick(i + 1)}
+                  winner={winningSquares && winningSquares.includes(i + 1)}
+                  isWinningSquare={
+                    winningSquares && winningSquares.includes(i + 1)
+                  }
+                />
+                <Square
+                  value={squares[i + 2]}
+                  onSquareClick={() => handleClick(i + 2)}
+                  winner={winningSquares && winningSquares.includes(i + 2)}
+                  isWinningSquare={
+                    winningSquares && winningSquares.includes(i + 2)
+                  }
+                />
+              </div>
+            );
+          }
+          return null;
+        })}
       </div>
-      <div className="board-row">
-        <Square
-          value={squares[3]}
-          onSquareClick={() => handleClick(3)}
-          winner={winner && winner === squares[3]}
-        />
-        <Square
-          value={squares[4]}
-          onSquareClick={() => handleClick(4)}
-          winner={winner && winner === squares[4]}
-        />
-        <Square
-          value={squares[5]}
-          onSquareClick={() => handleClick(5)}
-          winner={winner && winner === squares[5]}
-        />
-      </div>
-      <div className="board-row">
-        <Square
-          value={squares[6]}
-          onSquareClick={() => handleClick(6)}
-          winner={winner && winner === squares[6]}
-        />
-        <Square
-          value={squares[7]}
-          onSquareClick={() => handleClick(7)}
-          winner={winner && winner === squares[7]}
-        />
-        <Square
-          value={squares[8]}
-          onSquareClick={() => handleClick(8)}
-          winner={winner && winner === squares[8]}
-        />
-      </div>
-      <div className="status" style={{ color: winner ? "green" : "black" }}>
-        {status}
-      </div>
+      {winningSquares && (
+        <div className="move">
+          <h2>Winner: {squares[winningSquares[0]]}</h2>
+          <p>
+            Winning squares:{" "}
+            {winningSquares.map((square) => (
+              <span key={square}>{square + 1} </span>
+            ))}
+          </p>
+        </div>
+      )}
+      {isDraw && <h2>It's a draw!</h2>}
     </>
   );
 }
@@ -139,24 +154,4 @@ export default function Game() {
       </div>
     </div>
   );
-}
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
 }
