@@ -6,7 +6,7 @@ function Square({ value, onSquareClick, winner, isWinningSquare }) {
       className="square"
       style={{
         backgroundColor: winner && "green",
-        opacity: isWinningSquare && 0.5,
+
       }}
       onClick={onSquareClick}>
       {value}
@@ -93,6 +93,7 @@ function Board({ xIsNext, squares, onPlay }) {
           return null;
         })}
       </div>
+      {!winningSquares && !isDraw && <p>Next move: {xIsNext ? "X" : "O"}</p>}
       {winningSquares && (
         <div className="move">
           <h2>Winner: {squares[winningSquares[0]]}</h2>
